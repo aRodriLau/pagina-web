@@ -1,0 +1,50 @@
+{
+  "expo": {
+    "name": "Tappa",
+    "slug": "tappa",
+    "scheme": "tappa",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "app.tappa.mobile",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Usiamo la tua posizione per mostrarti i posti adatti a te nelle vicinanze.",
+        "NSPhotoLibraryUsageDescription": "Per condividere le foto dei posti che hai visitato.",
+        "NSCameraUsageDescription": "Per fotografare i posti che visiti."
+      }
+    },
+    "android": {
+      "package": "app.tappa.mobile",
+      "adaptiveIcon": {
+        "backgroundColor": "#FFFBF5",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "permissions": ["ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION"],
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "output": "single"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-location",
+        { "locationWhenInUsePermission": "Usiamo la tua posizione per mostrarti i posti adatti a te nelle vicinanze." }
+      ],
+      [
+        "expo-image-picker",
+        { "photosPermission": "Per condividere le foto dei posti che hai visitato." }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": false
+    }
+  }
+}
