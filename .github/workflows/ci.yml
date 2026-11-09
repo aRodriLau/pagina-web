@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  api:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_USER: tappa
+          POSTGRES_PASSWORD: tappa
+          POSTGRES_DB: tappa_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U tappa" --health-interval 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://tappa:tappa@localhost:5432/tappa_test
+      TEST_DATABASE_URL: postgresql://tappa:tappa@localhost:5432/tappa_test
+      JWT_SECRET: ci-secret-ci-secret-ci-secret-ci-secret
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx prisma generate
+        working-directory: apps/api
+      - run: npm run typecheck -w @tappa/api -w @tappa/shared
+      - run: npm test
+      - run: npm run build -w @tappa/api

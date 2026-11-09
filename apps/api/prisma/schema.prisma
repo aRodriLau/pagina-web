@@ -1,0 +1,375 @@
+// Schema del database di Tappa (PostgreSQL 16 + PostGIS).
+// Le coordinate sono salvate in lat/lng e copiate da un trigger nella
+// colonna `location` (geography) indicizzata GIST per le ricerche "vicino a me".
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [postgis, pg_trgm]
+}
+
+enum Role {
+  USER
+  MODERATOR
+  ADMIN
+}
+
+enum TravelerType {
+  FAMILY_WITH_KIDS
+  SENIOR
+  WITH_PETS
+  REDUCED_MOBILITY
+  SOLO
+  COUPLE
+  GROUP
+}
+
+enum PlaceCategory {
+  RESTAURANT
+  CAFE
+  ATTRACTION
+  MUSEUM
+  PARK
+  PLAYGROUND
+  BEACH
+  NATURE
+  ACCOMMODATION
+  SHOPPING
+  EVENT
+  OTHER
+}
+
+enum ContentStatus {
+  PUBLISHED
+  HIDDEN // nascosto in attesa di moderazione
+  REMOVED
+}
+
+enum UploadStatus {
+  PENDING
+  ATTACHED
+}
+
+enum ReportTarget {
+  POST
+  COMMENT
+  USER
+  PLACE
+  MESSAGE
+}
+
+enum ReportReason {
+  SPAM
+  INAPPROPRIATE
+  MINOR_SAFETY
+  HARASSMENT
+  WRONG_INFO
+  OTHER
+}
+
+enum ReportStatus {
+  OPEN
+  ACTIONED
+  DISMISSED
+}
+
+model User {
+  id              String         @id @default(uuid()) @db.Uuid
+  email           String         @unique
+  username        String         @unique
+  passwordHash    String
+  displayName     String
+  bio             String?
+  avatarKey       String?
+  homeCity        String?
+  travelerTypes   TravelerType[]
+  role            Role           @default(USER)
+  emailVerifiedAt DateTime?
+  termsAcceptedAt DateTime
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  deletedAt       DateTime?
+
+  refreshTokens  RefreshToken[]
+  posts          Post[]
+  comments       Comment[]
+  helpfulVotes   HelpfulVote[]
+  featureVotes   FeatureVote[]
+  placesCreated  Place[]              @relation("PlaceCreatedBy")
+  following      Follow[]             @relation("Follower")
+  followers      Follow[]             @relation("Following")
+  blocking       Block[]              @relation("Blocker")
+  blockedBy      Block[]              @relation("Blocked")
+  memberships    ConversationMember[]
+  messages       Message[]
+  lists          SavedList[]
+  uploads        Upload[]
+  reports        Report[]             @relation("Reporter")
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @db.Uuid
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// SHA-256 del token: in chiaro non viene mai salvato.
+  tokenHash String    @unique
+  /// Tutti i token nati dallo stesso login: se uno già usato viene riutilizzato, si revoca l'intera famiglia.
+  familyId  String    @db.Uuid
+  expiresAt DateTime
+  usedAt    DateTime?
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@index([familyId])
+}
+
+model Follow {
+  followerId  String   @db.Uuid
+  followingId String   @db.Uuid
+  follower    User     @relation("Follower", fields: [followerId], references: [id], onDelete: Cascade)
+  following   User     @relation("Following", fields: [followingId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@id([followerId, followingId])
+  @@index([followingId])
+}
+
+model Block {
+  blockerId String   @db.Uuid
+  blockedId String   @db.Uuid
+  blocker   User     @relation("Blocker", fields: [blockerId], references: [id], onDelete: Cascade)
+  blocked   User     @relation("Blocked", fields: [blockedId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([blockerId, blockedId])
+}
+
+model Place {
+  id          String        @id @default(uuid()) @db.Uuid
+  name        String
+  description String?
+  category    PlaceCategory
+  address     String?
+  city        String
+  country     String        @db.Char(2)
+  lat         Float
+  lng         Float
+  location    Unsupported("geography(Point, 4326)")?
+  /// 0 = gratis ... 4 = €€€€
+  priceLevel  Int?
+  website     String?
+  phone       String?
+  externalId  String?       @unique
+
+  // Aggregati denormalizzati, aggiornati a ogni post
+  ratingAvg         Float?
+  ratingCount       Int      @default(0)
+  avgCostPerPerson  Decimal? @db.Decimal(10, 2)
+  costReportsCount  Int      @default(0)
+  postCount         Int      @default(0)
+
+  createdById String?  @db.Uuid
+  createdBy   User?    @relation("PlaceCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  status      ContentStatus @default(PUBLISHED)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  features     PlaceFeature[]
+  featureVotes FeatureVote[]
+  posts        Post[]
+  savedIn      SavedPlace[]
+  messages     Message[]
+
+  @@index([city])
+  @@index([category])
+  @@index([location], type: Gist)
+  @@index([name(ops: raw("gin_trgm_ops"))], type: Gin, map: "Place_name_trgm_idx")
+}
+
+/// Aggregato delle conferme della community per una caratteristica di un luogo.
+model PlaceFeature {
+  placeId       String   @db.Uuid
+  place         Place    @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  /// Codice dal catalogo condiviso (@tappa/shared FEATURES)
+  feature       String
+  confirmations Int      @default(0)
+  denials       Int      @default(0)
+  updatedAt     DateTime @updatedAt
+
+  @@id([placeId, feature])
+  @@index([feature, confirmations])
+}
+
+model FeatureVote {
+  userId    String   @db.Uuid
+  placeId   String   @db.Uuid
+  feature   String
+  present   Boolean
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  place     Place    @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([userId, placeId, feature])
+  @@index([placeId, feature])
+}
+
+model Post {
+  id            String         @id @default(uuid()) @db.Uuid
+  authorId      String         @db.Uuid
+  author        User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  placeId       String         @db.Uuid
+  place         Place          @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  caption       String?
+  rating        Int
+  costPerPerson Decimal?       @db.Decimal(10, 2)
+  visitedWith   TravelerType[]
+  kidsAges      Int[]
+  visitedAt     DateTime?
+  /// "Utile" al posto dei like: premia l'informazione, non la popolarità.
+  helpfulCount  Int            @default(0)
+  commentCount  Int            @default(0)
+  status        ContentStatus  @default(PUBLISHED)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  photos   PostPhoto[]
+  comments Comment[]
+  helpful  HelpfulVote[]
+
+  @@index([placeId, createdAt])
+  @@index([authorId, createdAt])
+  @@index([createdAt])
+}
+
+model PostPhoto {
+  id       String  @id @default(uuid()) @db.Uuid
+  postId   String  @db.Uuid
+  post     Post    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  key      String
+  position Int
+  width    Int?
+  height   Int?
+  blurhash String?
+
+  @@index([postId])
+}
+
+model HelpfulVote {
+  userId    String   @db.Uuid
+  postId    String   @db.Uuid
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([userId, postId])
+}
+
+model Comment {
+  id        String        @id @default(uuid()) @db.Uuid
+  postId    String        @db.Uuid
+  post      Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
+  authorId  String        @db.Uuid
+  author    User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  body      String
+  status    ContentStatus @default(PUBLISHED)
+  createdAt DateTime      @default(now())
+
+  @@index([postId, createdAt])
+}
+
+model SavedList {
+  id        String       @id @default(uuid()) @db.Uuid
+  ownerId   String       @db.Uuid
+  owner     User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  name      String
+  isPublic  Boolean      @default(false)
+  createdAt DateTime     @default(now())
+  places    SavedPlace[]
+
+  @@index([ownerId])
+}
+
+model SavedPlace {
+  listId    String    @db.Uuid
+  placeId   String    @db.Uuid
+  list      SavedList @relation(fields: [listId], references: [id], onDelete: Cascade)
+  place     Place     @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  note      String?
+  createdAt DateTime  @default(now())
+
+  @@id([listId, placeId])
+}
+
+model Conversation {
+  id            String               @id @default(uuid()) @db.Uuid
+  title         String?
+  isGroup       Boolean              @default(false)
+  createdAt     DateTime             @default(now())
+  lastMessageAt DateTime             @default(now())
+  members       ConversationMember[]
+  messages      Message[]
+
+  @@index([lastMessageAt])
+}
+
+model ConversationMember {
+  conversationId String       @db.Uuid
+  userId         String       @db.Uuid
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  joinedAt       DateTime     @default(now())
+  lastReadAt     DateTime?
+
+  @@id([conversationId, userId])
+  @@index([userId])
+}
+
+model Message {
+  id             String       @id @default(uuid()) @db.Uuid
+  conversationId String       @db.Uuid
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       String       @db.Uuid
+  sender         User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  body           String
+  placeId        String?      @db.Uuid
+  place          Place?       @relation(fields: [placeId], references: [id], onDelete: SetNull)
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId, createdAt])
+}
+
+/// Traccia gli upload su S3: un post può usare solo foto caricate dal suo autore.
+model Upload {
+  key         String       @id
+  userId      String       @db.Uuid
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contentType String
+  sizeBytes   Int
+  status      UploadStatus @default(PENDING)
+  createdAt   DateTime     @default(now())
+
+  @@index([userId, status])
+}
+
+model Report {
+  id         String       @id @default(uuid()) @db.Uuid
+  reporterId String       @db.Uuid
+  reporter   User         @relation("Reporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  targetType ReportTarget
+  targetId   String       @db.Uuid
+  reason     ReportReason
+  details    String?
+  status     ReportStatus @default(OPEN)
+  createdAt  DateTime     @default(now())
+  resolvedAt DateTime?
+
+  @@unique([reporterId, targetType, targetId])
+  @@index([status, createdAt])
+}

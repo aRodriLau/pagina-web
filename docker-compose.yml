@@ -1,0 +1,33 @@
+# Servizi locali per lo sviluppo: database, cache/chat, storage immagini.
+# Avvio:  docker compose up -d
+services:
+  postgres:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_USER: tappa
+      POSTGRES_PASSWORD: tappa
+      POSTGRES_DB: tappa
+    ports: ["5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tappa"]
+      interval: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+
+  # Storage compatibile S3 (in produzione: Cloudflare R2 o AWS S3)
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: tappa
+      MINIO_ROOT_PASSWORD: tappa-secret
+    ports: ["9000:9000", "9001:9001"]
+    volumes: [miniodata:/data]
+
+volumes:
+  pgdata:
+  miniodata:

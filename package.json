@@ -1,0 +1,20 @@
+{
+  "name": "tappa",
+  "private": true,
+  "description": "Tappa — il social dei luoghi per chi viaggia, a ogni età",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:api": "npm run dev -w @tappa/api",
+    "dev:mobile": "npm run start -w @tappa/mobile",
+    "db:migrate": "npm run db:migrate -w @tappa/api",
+    "db:seed": "npm run db:seed -w @tappa/api",
+    "test": "npm run test -w @tappa/api",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
