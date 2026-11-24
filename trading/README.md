@@ -11,3 +11,7 @@
 
 **Regola:** il nucleo (FTSE All-World + Global Aggregate Bond + piano di accumulo) **non si tocca**.
 Il trading si fa solo con il fondo trading.
+
+## 📍 Dove siamo
+**Fase 0:** sto finendo il libro *Crea tu propia riqueza*. Poi: app uCharts → demo con dati reali → soldi veri.
+Il piano completo è in [strategia.md](strategia.md#il-piano-in-3-fasi--fase-0).

@@ -83,16 +83,23 @@ Se Trade Republic permette le frazioni per quel titolo, il calcolo si può fare 
 
 ---
 
-## Il piano in 3 fasi
+## Il piano in 3 fasi (+ fase 0)
+
+### Fase 0: Finire il libro · ⏳ IN CORSO
+- [ ] Finisco di leggere *Crea tu propia riqueza* (Alejandro Cardona)
+- [ ] Mando a Claude l'indice, i capitoli sulle strategie e gli appunti del corso
+- [ ] Claude adatta questa strategia alle regole del libro e del corso
+- [ ] Inizio a versare nel fondo trading
 
 ### Fase 1: Imparare a leggere (settimane 1-4) · nessuna operazione
 - [ ] Imposto uCharts: candele, settimanale, medie 20/50/200, volume
 - [ ] Analizzo con Claude i grafici delle 5 aziende della watchlist e compilo le schede
 - [ ] Trovo nel passato di ogni grafico **almeno 2 esempi** di questa strategia (vinti o persi)
-- [ ] Inizio a versare nel fondo trading
 
-### Fase 2: Paper trading (settimane 5-16) · soldi finti
+### Fase 2: Demo con dati reali (settimane 5-16) · soldi finti
 - [ ] Applico la strategia con il simulatore di uCharts, capitale finto 1.000 €
+- [ ] Ogni weekend mando a Claude **screenshot dei grafici reali e i dati** (prezzi, ordini, risultati)
+- [ ] Insieme decidiamo entrate, stop e uscite come se fosse vero, e aggiorniamo il diario
 - [ ] Almeno **10 operazioni** nel diario simulato
 - [ ] Rispetto lo stop in **tutte**
 - [ ] Calcolo: percentuale di vincite e guadagno medio / perdita media
