@@ -2,6 +2,7 @@
 
 | File | A cosa serve |
 |---|---|
+| [strategia.md](strategia.md) | ⭐ La strategia "Pullback sul trend", le regole e il piano in 3 fasi |
 | [fondo-trading.md](fondo-trading.md) | Tieni traccia del fondo trading fino a 1.000 € |
 | [watchlist.md](watchlist.md) | Le aziende che stiamo studiando e a che punto siamo |
 | [schede/](schede/) | Una scheda per azienda: cosa fa, rischi, analisi del grafico |
