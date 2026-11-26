@@ -169,3 +169,27 @@ ROE alto è buono, ma ROE alto **solo grazie ai debiti** è più rischioso.
 - Guarda **più anni**: un buon anno isolato non basta, conta che resti alto e stabile.
 - Come orientamento generale: **ROE sopra il 15%** stabile negli anni è considerato buono.
 - **Analisi fondamentale = COSA comprare** (aziende buone). **Analisi tecnica = QUANDO comprare** (il grafico).
+
+### Ingresos totales e utilidad neta (dal fatturato all'utile)
+
+Stessa pizzeria, un anno di attività:
+
+| Voce | € | |
+|---|---|---|
+| **Ingresos totales** / Ricavi (fatturato) / *Revenue* | **80.000** | tutte le pizze vendute |
+| − Ingredienti | −25.000 | |
+| = **Utile lordo** (*utilidad bruta*) | 55.000 | |
+| − Stipendi, affitto, luce | −38.000 | |
+| = **Utile operativo** (*utilidad operativa*, EBIT) | 17.000 | quanto guadagna il lavoro della pizzeria |
+| − Interessi alla banca | −3.000 | |
+| − Tasse | −4.000 | |
+| = **Utilidad neta** / Utile netto / *Net income* | **10.000** | quello che resta davvero ai soci |
+
+**Margine netto** = utile netto ÷ ricavi = 10.000 ÷ 80.000 = **12,5%** → su ogni pizza da 10 € restano 1,25 €.
+
+**Cosa guardare:**
+- **Ricavi che crescono** = l'azienda vende di più (ci sono clienti).
+- **Utile netto che cresce** = vende di più **e** ci guadagna. Servono entrambi.
+- ⚠️ Ricavi che salgono ma utile che scende → i costi crescono più delle vendite.
+- ⚠️ Ricavi alti ma utile negativo → vende tanto ma perde soldi (tipico di aziende giovani: rischiose).
+- L'utile netto è il numero sopra la linea di ROE e ROA: **ROE = utile netto ÷ patrimonio**.
