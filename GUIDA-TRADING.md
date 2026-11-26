@@ -143,3 +143,29 @@ Azioni (da position-sizer):         Rischio €:
 Risultato:       € / %
 Cosa ho imparato:
 ```
+
+---
+
+## Analisi fondamentale: quanto è brava un'azienda a fare soldi
+
+Esempio unico: una **pizzeria** con forno, locale e attrezzi per **100.000 €** (= attivo).
+Il proprietario ci ha messo **40.000 €** suoi (= patrimonio netto), gli altri **60.000 €** sono un prestito (= debiti).
+In un anno fa **10.000 €** di utile netto.
+
+| Termine (ES / IT / EN) | Formula | Pizzeria | Cosa ti dice |
+|---|---|---|---|
+| **Rentabilidad sobre el activo** / Redditività dell'attivo / **ROA** | utile ÷ attivo totale | 10.000 ÷ 100.000 = **10%** | Quanto bene usa **tutto** quello che possiede (forno, locale...) |
+| **Rentabilidad sobre el patrimonio** / Redditività del capitale proprio / **ROE** | utile ÷ patrimonio netto | 10.000 ÷ 40.000 = **25%** | Quanto rende **ai soci** ogni euro che hanno messo loro |
+| **Rentabilidad sobre la inversión** / Ritorno sull'investimento / **ROI** | (guadagno − costo) ÷ costo | nuovo forno da 5.000 € che porta 1.500 € in più all'anno → **30%** | Quanto rende **un singolo investimento** (anche il tuo acquisto di azioni) |
+
+**Il trucco ROE vs ROA:** se il ROE è molto più alto del ROA, l'azienda usa **molti debiti** (leva).
+ROE alto è buono, ma ROE alto **solo grazie ai debiti** è più rischioso.
+
+**ROI delle tue azioni:** compri a 100 €, rivendi a 120 € e hai preso 2 € di dividendo →
+(120 + 2 − 100) ÷ 100 = **22%**. Ricordati di togliere le commissioni.
+
+**Regole pratiche:**
+- Confronta sempre aziende **dello stesso settore** (una banca ha ROA bassissimo per natura, un'azienda di software alto).
+- Guarda **più anni**: un buon anno isolato non basta, conta che resti alto e stabile.
+- Come orientamento generale: **ROE sopra il 15%** stabile negli anni è considerato buono.
+- **Analisi fondamentale = COSA comprare** (aziende buone). **Analisi tecnica = QUANDO comprare** (il grafico).
